@@ -438,7 +438,6 @@ john:!:20041:0:99999:7:::
 
 
 # loging as root with bash: on a new terminal run:
-
 docker exec -it <container_id> bash
 docker exec -it a5cca4daea25 bash
 
@@ -469,9 +468,11 @@ userdel john
 
 # NOTE: about different way of adding a user
 
-useradd # used above
+# used above
+useradd 
 
-adduser: # a command from 'perl'; kind of update of 'useradd'; adding interactivity
+# a command from 'perl'; kind of update of 'useradd'; adding interactivity
+adduser: 
 
 root@a5cca4daea25:~# adduser --help
 
@@ -541,3 +542,185 @@ info: Adding new user `bob' to supplemental / extra groups `users' ...
 info: Adding user `bob' to group `users' ...
 root@a5cca4daea25:~# 
 
+
+# check inputs for bob:
+
+cat /etc/passwd # check the last line
+bob:x:1002:1002:Bob Smith,1001,+33148421292,+33177122334,bob.smith@gmail.com:/home/bob:/bin/bash
+
+
+# 14. Managing Group
+# --------------------
+
+groupadd
+Usage: groupadd [options] GROUP
+
+Options:
+  -f, --force                   exit successfully if the group already exists,
+                                and cancel -g if the GID is already used
+  -g, --gid GID                 use GID for the new group
+  -h, --help                    display this help message and exit
+  -K, --key KEY=VALUE           override /etc/login.defs defaults
+  -o, --non-unique              allow to create groups with duplicate
+                                (non-unique) GID
+  -p, --password PASSWORD       use this encrypted password for the new group
+  -r, --system                  create a system account
+  -R, --root CHROOT_DIR         directory to chroot into
+  -P, --prefix PREFIX_DI        directory prefix
+  -U, --users USERS             list of user members of this group
+      --extrausers              Use the extra users database
+
+# --------------------
+
+groupmod
+Usage: groupmod [options] GROUP
+
+Options:
+  -a, --append                  append the users mentioned by -U option to the group 
+                                without removing existing user members
+  -g, --gid GID                 change the group ID to GID
+  -h, --help                    display this help message and exit
+  -n, --new-name NEW_GROUP      change the name to NEW_GROUP
+  -o, --non-unique              allow to use a duplicate (non-unique) GID
+  -p, --password PASSWORD       change the password to this (encrypted)
+                                PASSWORD
+  -R, --root CHROOT_DIR         directory to chroot into
+  -P, --prefix PREFIX_DIR       prefix directory where are located the /etc/* files
+  -U, --users USERS             list of user members of this group
+
+# --------------------
+
+groupdel
+Usage: groupdel [options] GROUP
+
+Options:
+  -h, --help                    display this help message and exit
+  -R, --root CHROOT_DIR         directory to chroot into
+  -P, --prefix PREFIX_DIR       prefix directory where are located the /etc/* files
+  -f, --force                   delete group even if it is the primary group of a user
+      --extrausers              Use the extra users database
+
+
+# ---------
+
+# let's add a new group
+
+groupadd developers
+
+# check group added
+cat /etc/group
+
+# outputs
+...
+...
+users:x:100:bob
+nogroup:x:65534:
+ubuntu:x:1000:
+john:x:1001:
+bob:x:1002:
+developers:x:1003:
+
+
+# now let's add the user 'john' to the supplementary 'developers' group 
+
+usermod 
+Usage: usermod [options] LOGIN
+
+Options:
+  -a, --append                  append the user to the supplemental GROUPS
+                                mentioned by the -G option without removing
+                                the user from other groups
+  -b, --badname                 allow bad names
+  -c, --comment COMMENT         new value of the GECOS field
+  -d, --home HOME_DIR           new home directory for the user account
+  -e, --expiredate EXPIRE_DATE  set account expiration date to EXPIRE_DATE
+  -f, --inactive INACTIVE       set password inactive after expiration
+                                to INACTIVE
+  -g, --gid GROUP               force use GROUP as new primary group
+  -G, --groups GROUPS           new list of supplementary GROUPS
+  -h, --help                    display this help message and exit
+  -l, --login NEW_LOGIN         new value of the login name
+  -L, --lock                    lock the user account
+  -m, --move-home               move contents of the home directory to the
+                                new location (use only with -d)
+  -o, --non-unique              allow using duplicate (non-unique) UID
+  -p, --password PASSWORD       use encrypted password for the new password
+  -P, --prefix PREFIX_DIR       prefix directory where are located the /etc/* files
+  -r, --remove                  remove the user from only the supplemental GROUPS
+                                mentioned by the -G option without removing
+                                the user from other groups
+  -R, --root CHROOT_DIR         directory to chroot into
+  -s, --shell SHELL             new login shell for the user account
+  -u, --uid UID                 new UID for the user account
+  -U, --unlock                  unlock the user account
+  -v, --add-subuids FIRST-LAST  add range of subordinate uids
+  -V, --del-subuids FIRST-LAST  remove range of subordinate uids
+  -w, --add-subgids FIRST-LAST  add range of subordinate gids
+  -W, --del-subgids FIRST-LAST  remove range of subordinate gids
+  -Z, --selinux-user SEUSER     new SELinux user mapping for the user account
+
+
+usermod -G developers john
+
+# check the /etc/passwd
+cat /etc/passwd | grep john
+
+# OR
+grep john /etc/passwd
+
+# also to see all group run:
+cat /etc/group
+
+
+# add a new user and add he in the supplementary 'developers' group too
+
+adduser mike
+info: Adding user `mike' ...
+info: Selecting UID/GID from range 1000 to 59999 ...
+info: Adding new group `mike' (1004) ...
+info: Adding new user `mike' (1004) with group `mike (1004)' ...
+info: Creating home directory `/home/mike' ...
+info: Copying files from `/etc/skel' ...
+New password: 
+Retype new password: 
+passwd: password updated successfully
+Changing the user information for mike
+Enter the new value, or press ENTER for the default
+	Full Name []: Mike Tyson
+	Room Number []: 102
+	Work Phone []: +33132435465
+	Home Phone []: +31876545432
+	Other []: mike-tyson@gamil.com
+Is the information correct? [Y/n] y
+info: Adding new user `mike' to supplemental / extra groups `users' ...
+info: Adding user `mike' to group `users' ...
+
+# add user 'mike' to 'developers' group
+usermod -G developers mike
+
+# check group list
+
+cat /etc/group
+
+# outputs
+...
+...
+users:x:100:bob
+nogroup:x:65534:
+ubuntu:x:1000:
+john:x:1001:
+bob:x:1002:
+developers:x:1003:john,mike
+mike:x:1004:
+
+# another way to check user in a group
+
+groups john
+john : john developers
+#       ^--1    ^-- 2
+# 1 : for primary group
+# 2 : for supplementery group 
+
+# add 'john' to a new 'artist' group
+
+groupadd artist
