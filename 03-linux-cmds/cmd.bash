@@ -253,4 +253,40 @@ docker start -i <container_id>
 echo DB_USER=daniel >> .bashrc
 source .bashrc
 
-# STOP: 01h:13:03
+
+# 12. Managing Processes
+# -------------------------
+
+# definition: a process is an instance of a running program.
+
+# to see all processes
+ps  # outputs
+
+PID TTY          TIME CMD
+1   pts/0    00:00:00 bash
+16  pts/0    00:00:00 ps
+
+# how to kill longue consuming CPU time process ?
+
+# create a slow process
+sleep 100 &
+
+# check for all process to get the slow process PID
+ps
+
+  PID TTY          TIME CMD
+    1 pts/0    00:00:00 bash
+   17 pts/0    00:00:00 sleep
+   18 pts/0    00:00:00 ps
+
+
+# kill the slow process
+kill 17
+
+# confirm
+ps
+  PID TTY          TIME CMD
+    1 pts/0    00:00:00 bash
+   18 pts/0    00:00:00 ps
+
+
