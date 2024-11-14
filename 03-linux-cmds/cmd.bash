@@ -724,3 +724,70 @@ john : john developers
 # add 'john' to a new 'artist' group
 
 groupadd artist
+
+
+
+# 15. File permission
+# ---------------------
+
+# append to a new file:
+echo echo hello > deploy.sh
+
+# check
+cat echo.sh
+
+# check permission for this file, from the home dir.
+ls -l
+total 16
+drwxr-x--- 2 bob  bob  4096 Nov 14 21:44 bob
+-rw-r--r-- 1 root root   11 Nov 14 22:23 deploy.sh
+drwxr-x--- 2 john john 4096 Nov 14 21:20 john
+drwxr-x--- 2 mike mike 4096 Nov 14 22:07 mike
+
+# try to execute 'deploy.sh'
+./deploy.sh
+
+# outputs 
+bash: ./deploy.sh: Permission denied
+
+# update permissions for user
+chmod u+x deploy.sh
+
+# check again
+ls -l
+total 16
+drwxr-x--- 2 bob  bob  4096 Nov 14 21:44 bob
+-rwxr--r-- 1 root root   11 Nov 14 22:23 deploy.sh
+drwxr-x--- 2 john john 4096 Nov 14 21:20 john
+drwxr-x--- 2 mike mike 4096 Nov 14 22:07 mike
+
+
+# then execute 'deploy.sh'
+./deploy.sh
+hello
+
+# try to execute 'deploy.sh' as user 'john'
+john@a5cca4daea25:/home$ ./deploy.sh
+bash: ./deploy.sh: Permission denied
+
+# from the terminal of 'root', give the executable authorization to 'other' users
+chmod o+x deploy.sh
+
+# check:
+
+ls -l
+total 16
+drwxr-x--- 2 bob  bob  4096 Nov 14 21:44 bob
+-rwxr--r-- 1 root root   11 Nov 14 22:23 deploy.sh
+drwxr-x--- 2 john john 4096 Nov 14 21:20 john
+drwxr-x--- 2 mike mike 4096 Nov 14 22:07 mike
+
+
+# from user 'john' terminal, execute 'deploy.sh'
+./deploy.sh
+hello
+
+# other possible 'chmod' combination
+chmod og+x+w-r deploy.sh
+chmod og+x+w-r *.sh
+etc
