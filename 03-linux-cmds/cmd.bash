@@ -290,3 +290,254 @@ ps
    18 pts/0    00:00:00 ps
 
 
+# 13. Managing Users
+# --------------------
+
+root@a5cca4daea25:~# useradd
+Usage: useradd [options] LOGIN
+       useradd -D
+       useradd -D [options]
+
+Options:
+      --badname                 do not check for bad names
+  -b, --base-dir BASE_DIR       base directory for the home directory of the
+                                new account
+      --btrfs-subvolume-home    use BTRFS subvolume for home directory
+  -c, --comment COMMENT         GECOS field of the new account
+  -d, --home-dir HOME_DIR       home directory of the new account
+  -D, --defaults                print or change default useradd configuration
+  -e, --expiredate EXPIRE_DATE  expiration date of the new account
+  -f, --inactive INACTIVE       password inactivity period of the new account
+  -F, --add-subids-for-system   add entries to sub[ud]id even when adding a system user
+  -g, --gid GROUP               name or ID of the primary group of the new
+                                account
+  -G, --groups GROUPS           list of supplementary groups of the new
+                                account
+  -h, --help                    display this help message and exit
+  -k, --skel SKEL_DIR           use this alternative skeleton directory
+  -K, --key KEY=VALUE           override /etc/login.defs defaults
+  -l, --no-log-init             do not add the user to the lastlog and
+                                faillog databases
+  -m, --create-home             create the user's home directory
+  -M, --no-create-home          do not create the user's home directory
+  -N, --no-user-group           do not create a group with the same name as
+                                the user
+  -o, --non-unique              allow to create users with duplicate
+                                (non-unique) UID
+  -p, --password PASSWORD       encrypted password of the new account
+  -r, --system                  create a system account
+  -R, --root CHROOT_DIR         directory to chroot into
+  -P, --prefix PREFIX_DIR       prefix directory where are located the /etc/* files
+  -s, --shell SHELL             login shell of the new account
+  -u, --uid UID                 user ID of the new account
+  -U, --user-group              create a group with the same name as the user
+  -Z, --selinux-user SEUSER     use a specific SEUSER for the SELinux user mapping
+      --extrausers              Use the extra users database
+
+
+#-------------------------------------------------
+
+root@a5cca4daea25:~# usermod
+Usage: usermod [options] LOGIN
+
+Options:
+  -a, --append                  append the user to the supplemental GROUPS
+                                mentioned by the -G option without removing
+                                the user from other groups
+  -b, --badname                 allow bad names
+  -c, --comment COMMENT         new value of the GECOS field
+  -d, --home HOME_DIR           new home directory for the user account
+  -e, --expiredate EXPIRE_DATE  set account expiration date to EXPIRE_DATE
+  -f, --inactive INACTIVE       set password inactive after expiration
+                                to INACTIVE
+  -g, --gid GROUP               force use GROUP as new primary group
+  -G, --groups GROUPS           new list of supplementary GROUPS
+  -h, --help                    display this help message and exit
+  -l, --login NEW_LOGIN         new value of the login name
+  -L, --lock                    lock the user account
+  -m, --move-home               move contents of the home directory to the
+                                new location (use only with -d)
+  -o, --non-unique              allow using duplicate (non-unique) UID
+  -p, --password PASSWORD       use encrypted password for the new password
+  -P, --prefix PREFIX_DIR       prefix directory where are located the /etc/* files
+  -r, --remove                  remove the user from only the supplemental GROUPS
+                                mentioned by the -G option without removing
+                                the user from other groups
+  -R, --root CHROOT_DIR         directory to chroot into
+  -s, --shell SHELL             new login shell for the user account
+  -u, --uid UID                 new UID for the user account
+  -U, --unlock                  unlock the user account
+  -v, --add-subuids FIRST-LAST  add range of subordinate uids
+  -V, --del-subuids FIRST-LAST  remove range of subordinate uids
+  -w, --add-subgids FIRST-LAST  add range of subordinate gids
+  -W, --del-subgids FIRST-LAST  remove range of subordinate gids
+  -Z, --selinux-user SEUSER     new SELinux user mapping for the user account
+
+
+#-------------------------------------------------
+
+root@a5cca4daea25:~# userdel
+Usage: userdel [options] LOGIN
+
+Options:
+  -f, --force                   force some actions that would fail otherwise
+                                e.g. removal of user still logged in
+                                or files, even if not owned by the user
+  -h, --help                    display this help message and exit
+  -r, --remove                  remove home directory and mail spool
+  -R, --root CHROOT_DIR         directory to chroot into
+  -P, --prefix PREFIX_DIR       prefix directory where are located the /etc/* files
+      --extrausers              Use the extra users database
+  -Z, --selinux-user            remove any SELinux user mapping for the user
+
+
+
+
+# ---------------------------------------------------
+
+# add a ne user
+useradd -m john
+
+# check new user account infos
+cat /etc/passwd
+
+# outputs:
+john:x:1001:1001::/home/john:/bin/sh
+
+# modify user props so that when he logs in he uses 'bash' instead of 'sh'
+usermod  -s /bin/bash john
+
+# check new user account infos again
+cat /etc/passwd
+
+# outputs
+john:x:1001:1001::/home/john:/bin/bash
+
+# check for password
+root@a5cca4daea25:~# cat /etc/shadow
+root:*:20007:0:99999:7:::
+daemon:*:20007:0:99999:7:::
+bin:*:20007:0:99999:7:::
+sys:*:20007:0:99999:7:::
+sync:*:20007:0:99999:7:::
+games:*:20007:0:99999:7:::
+man:*:20007:0:99999:7:::
+lp:*:20007:0:99999:7:::
+mail:*:20007:0:99999:7:::
+news:*:20007:0:99999:7:::
+uucp:*:20007:0:99999:7:::
+proxy:*:20007:0:99999:7:::
+www-data:*:20007:0:99999:7:::
+backup:*:20007:0:99999:7:::
+list:*:20007:0:99999:7:::
+irc:*:20007:0:99999:7:::
+_apt:*:20007:0:99999:7:::
+nobody:*:20007:0:99999:7:::
+ubuntu:!:20007:0:99999:7:::
+john:!:20041:0:99999:7:::
+
+
+# loging as root with bash: on a new terminal run:
+
+docker exec -it <container_id> bash
+docker exec -it a5cca4daea25 bash
+
+# outputs:
+root@a5cca4daea25:/#
+# ^-- root         ^-- root user prompt
+
+# loging as 'john' with bash: on a new terminal run:
+
+docker exec -it -u <user_name> <container_id> bash
+docker exec -it -u john a5cca4daea25 bash
+
+# outputs:
+john@a5cca4daea25:/$
+# ^-- john         ^-- regular user prompt
+
+# try to access 'shadow' file as a regular user
+cat /etc/shadow
+cat: /etc/shadow: Permission denied
+
+# user 'john' home direcetory
+john@a5cca4daea25:/$ cd ~
+john@a5cca4daea25:~$ pwd
+/home/john
+
+# if needed remove user 'john' ( don't run it for now !)
+userdel john
+
+# NOTE: about different way of adding a user
+
+useradd # used above
+
+adduser: # a command from 'perl'; kind of update of 'useradd'; adding interactivity
+
+root@a5cca4daea25:~# adduser --help
+
+adduser [--uid id] [--firstuid id] [--lastuid id]
+        [--gid id] [--firstgid id] [--lastgid id] [--ingroup group]
+        [--add-extra-groups] [--encrypt-home] [--shell shell]
+        [--comment comment] [--home dir] [--no-create-home]
+        [--allow-all-names] [--allow-bad-names]
+        [--disabled-password] [--disabled-login]
+        [--conf file] [--extrausers] [--quiet] [--verbose] [--debug]
+        user
+    Add a normal user
+
+adduser --system
+        [--uid id] [--group] [--ingroup group] [--gid id]
+        [--shell shell] [--comment comment] [--home dir] [--no-create-home]
+        [--conf file] [--extrausers] [--quiet] [--verbose] [--debug]
+        user
+   Add a system user
+
+adduser --group
+        [--gid ID] [--firstgid id] [--lastgid id]
+        [--conf file] [--extrausers] [--quiet] [--verbose] [--debug]
+        group
+addgroup
+        [--gid ID] [--firstgid id] [--lastgid id]
+        [--conf file] [--extrausers] [--quiet] [--verbose] [--debug]
+        group
+   Add a user group
+
+addgroup --system
+        [--gid id]
+        [--conf file] [--extrausers] [--quiet] [--verbose] [--debug]
+        group
+   Add a system group
+
+adduser [--extrausers] USER GROUP
+   Add an existing user to an existing group
+
+
+# ----
+
+john@a5cca4daea25:~$ adduser bob   
+fatal: Only root may add a user or group to the system.
+
+# ----
+
+root@a5cca4daea25:~# adduser bob   
+info: Adding user `bob' ...
+info: Selecting UID/GID from range 1000 to 59999 ...
+info: Adding new group `bob' (1002) ...
+info: Adding new user `bob' (1002) with group `bob (1002)' ...
+info: Creating home directory `/home/bob' ...
+info: Copying files from `/etc/skel' ...
+New password: 
+Retype new password: 
+passwd: password updated successfully
+Changing the user information for bob
+Enter the new value, or press ENTER for the default
+	Full Name []: Bob Smith
+	Room Number []: 1001
+	Work Phone []: +33148421292
+	Home Phone []: +33177122334
+	Other []: bob.smith@gmail.com
+Is the information correct? [Y/n] y
+info: Adding new user `bob' to supplemental / extra groups `users' ...
+info: Adding user `bob' to group `users' ...
+root@a5cca4daea25:~# 
+
