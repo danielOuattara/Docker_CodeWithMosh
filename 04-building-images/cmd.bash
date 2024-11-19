@@ -112,7 +112,9 @@ v22.11.0
 
 FROM node:22.11-alpine3.20
 COPY package.json README.md  /app/
+# or
 COPY package*.json  /app/
+# or
 COPY .  /app/
 
 # --------------------------------
@@ -120,6 +122,7 @@ COPY .  /app/
 FROM node:22.11-alpine3.20
 WORKDIR /app
 COPY ["hello world.txt", "."]
+# or
 COPY . .
 
 # re-build the image 
@@ -151,18 +154,23 @@ src
 
 # See everything that has been copy to the WORKDIR, even `node_modules`
 
+
 # 6 - Excluding Files and Folders
 # --------------------------------
 
-# Exclude `node_modules` to make the `build context` lighter and build will de faster
-# The dependencies located in the `package.json` will be restored in the target image
-# create a `.dockerignore` at the root of the project
+# Exclude `node_modules` to make the `build context` 
+# lighter and the build will be faster. The dependencies 
+# located in the `package.json` will be restored in 
+# the target image. 
+
+# Create a `.dockerignore` at the root  of the project
+# then add `node_modules`.
 
 # re-build the image 
 docker build -t react-app-01-mosh .
 
-# then create and run a container from the newly created image
-# run shell so to be able to look the file system
+# then create and run a container from the newly created 
+# image run shell so to be able to look the file system
 docker run -it react-app-01-mosh sh
 
 # output:
@@ -183,7 +191,6 @@ src
 # confirm that `node_modules` is not present
 
 # we need to install the dependencies to make our app works
-
 
 
 # 7 - Running commands
@@ -254,10 +261,10 @@ API_URL=http://apu.myapp.com
 printenv API_URL
 
 # OR 
-eceho $API_URL
+echo $API_URL
 
 
-# 8 - Exposing Ports
+# 9 - Exposing Ports
 # --------------------
 
 # start the app locally
@@ -279,11 +286,22 @@ ENV API_URL=http://apu.myapp.com
 EXPOSE 3000
 
 
-# 8 - Setting the User
+# 10 - Setting the User
 # ---------------------
 
-# start interactively a new container using alpine
+# NOTICE: 
+# -> by default Docker run our application with 
+# the Root use, which has the highest privileges.
+
+# -> this can expose to a security threat
+
+# So to run this app, we should create a regular user 
+# with limited privileges
+
+# start interactively a new container in alpine
 docker run -it alpine
+
+# output
 /#
 
 # then type `adduser`
@@ -308,7 +326,7 @@ Create new user, or add USER to GROUP
 
 # before creating a system user, create a group
 
-# 1 create group and add use to the group
+# 1 - create group and add use to the group
 addgroup react-app
 adduser -S -G react-app react-app
 
@@ -316,9 +334,9 @@ adduser -S -G react-app react-app
 groups react-app
 
 
-# 2 create another group and add use to the group: combine cmds
+# 2 - using combine cmds: create another group and add a user to the group
 addgroup mosh-react && adduser -S -G mosh-react mosh-react
-groups mosh-react
+groups mosh-react # check OK
 
 # Dockerfile
 FROM node:22.11-alpine3.20
@@ -333,6 +351,19 @@ USER daniel
 # re-build the image 
 docker build -t react-app-01-mosh .
 
-# run again the shell so to be able to look the file system
+# run again the container and confirm that the 
+# actual user is just a regular one, not the root !
 docker run -it react-app-01-mosh sh
 
+# output: 
+/app $
+
+# run:
+/app $ whoami
+
+# ouptut
+daniel
+
+
+# 11 - Defining entrypoints
+# --------------------------
