@@ -367,3 +367,152 @@ daniel
 
 # 11 - Defining entrypoints
 # --------------------------
+
+
+# NOTICE: 
+
+# - react-app-01-mosh image has been deleted
+# - react-app-mosh image has been created instead for speed and clarity
+
+# now, how to start the application ?
+
+# run
+docker run react-app-mosh 
+
+# the container starts and stoppes
+
+# better run 
+docker run react-app-mosh npm start
+
+# output
+> react-app@0.1.0 start
+> react-scripts start
+
+...
+...
+  
+Failed to compile.
+
+[eslint] EACCES: permission denied, mkdir '/app/node_modules/.cache'
+ERROR in [eslint] EACCES: permission denied, mkdir '/app/node_modules/.cache'
+
+webpack compiled with 1 error
+
+
+# Dockerfile: before
+#-----
+FROM node:22.11-alpine3.20
+WORKDIR /app/
+COPY . .
+RUN npm install
+ENV API_URL=http://apu.myapp.com
+EXPOSE  3000
+RUN addgroup react-app && adduser -S -G react-app daniel
+USER daniel
+
+
+# Dockerfile: after
+#-----
+FROM node:22.11-alpine3.20
+# Create a group and user early
+RUN addgroup react-app && adduser -S -G react-app daniel
+# Set working directory
+WORKDIR /app
+# Copy files and change ownership to the non-root user
+COPY . .
+RUN chown -R daniel:react-app /app
+# Switch to the non-root user
+USER daniel
+# Install dependencies
+RUN npm install
+# Set environment variable
+ENV API_URL=http://apu.myapp.com
+# Expose application port
+EXPOSE 3000
+
+# then rebuild the image and start a new container 
+docker build -t react-app-mosh .
+
+#then run the app
+docker run react-app-mosh npm start
+
+#output:
+...
+...
+Compiled successfully!
+
+You can now view react-app in the browser.
+
+  Local:            http://localhost:3000
+  On Your Network:  http://172.17.0.2:3000
+
+# this is port 3000 for the container, NOT local host
+
+# speed the container start up, update the Dockerfile
+# then rebuild the image
+
+FROM node:22.11-alpine3.20
+RUN addgroup react-app && adduser -S -G react-app daniel
+WORKDIR /app
+COPY . .
+RUN chown -R daniel:react-app /app
+USER daniel
+RUN npm install
+ENV API_URL=http://apu.myapp.com
+EXPOSE 3000
+CMD npm start
+
+# after rebuilding the image, one can start the container 
+# more quickly using the following:
+
+docker build -t react-app-mosh .
+
+docker run react-app-mosh 
+
+# NOTICE: about RUN vs CMD
+
+# -> RUN is a built-time instruction
+# -> CMD is a run-time instruction
+
+
+# NOTICE: about CMD
+
+# -> shell form: Docker executes this cmd inside a separate shell
+CMD npm start
+
+# -> Exec form: Docker executes this cmd directly, no need for extra shell
+# -> BETTER: easier and faster to clean up resource  when starting a container
+CMD ["npm", "start"]
+
+# So update the Dockerfile
+
+FROM node:22.11-alpine3.20
+RUN addgroup react-app && adduser -S -G react-app daniel
+WORKDIR /app
+COPY . .
+RUN chown -R daniel:react-app /app
+USER daniel
+RUN npm install
+ENV API_URL=http://apu.myapp.com
+EXPOSE 3000
+CMD ["npm", "start"]
+
+# NOTICE: CMD vs ENTRYPOINT
+
+# -> Both are for executing commands
+# -> Both accept 'shell form' and 'execute form'
+
+# -> CMD can be easily overwritten by another cmd
+#  example: 
+# 	 -	create a image using CMD , 
+#    -  run `docker run react-app-mosh echo hello world`
+#  Here `echo hello world` will overwrite the `docker run react-app-mosh`
+
+
+# -> ENTRYPOINT can NOT be easily overwritten by another cmd
+#  example: 
+# 	 -	create a image using ENTRYPOINT , 
+#    -  run `docker run react-app-mosh --entrypoint echo hello world`
+#  Here `echo hello world` will NOW be able to overwrite the `docker run react-app-mosh`
+
+# CONCLUSION: CMD offers more flexibility and is the preferable way
