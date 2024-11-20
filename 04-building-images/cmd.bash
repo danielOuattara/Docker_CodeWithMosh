@@ -516,3 +516,63 @@ CMD ["npm", "start"]
 #  Here `echo hello world` will NOW be able to overwrite the `docker run react-app-mosh`
 
 # CONCLUSION: CMD offers more flexibility and is the preferable way
+
+
+
+# 11 - Speeding Up the builds
+# ----------------------------
+
+# read the following from bottom to top
+
+docker history react-app-mosh
+
+IMAGE          CREATED          CREATED BY                                      SIZE      COMMENT
+2952693e5467   17 minutes ago   CMD ["npm" "start"]                             0B        buildkit.dockerfile.v0
+<missing>      17 minutes ago   EXPOSE map[3000/tcp:{}]                         0B        buildkit.dockerfile.v0
+<missing>      17 minutes ago   ENV API_URL=http://apu.myapp.com                0B        buildkit.dockerfile.v0
+<missing>      17 minutes ago   RUN /bin/sh -c npm install # buildkit           288MB     buildkit.dockerfile.v0
+<missing>      17 minutes ago   USER daniel                                     0B        buildkit.dockerfile.v0
+<missing>      18 minutes ago   RUN /bin/sh -c chown -R daniel:react-app /ap…   701kB     buildkit.dockerfile.v0
+<missing>      18 minutes ago   COPY . . # buildkit                             701kB     buildkit.dockerfile.v0
+<missing>      16 hours ago     WORKDIR /app                                    0B        buildkit.dockerfile.v0
+<missing>      17 hours ago     RUN /bin/sh -c addgroup react-app && adduser…   3.26kB    buildkit.dockerfile.v0
+<missing>      3 weeks ago      CMD ["node"]                                    0B        buildkit.dockerfile.v0
+<missing>      3 weeks ago      ENTRYPOINT ["docker-entrypoint.sh"]             0B        buildkit.dockerfile.v0
+<missing>      3 weeks ago      COPY docker-entrypoint.sh /usr/local/bin/ # …   388B      buildkit.dockerfile.v0
+<missing>      3 weeks ago      RUN /bin/sh -c apk add --no-cache --virtual …   5.59MB    buildkit.dockerfile.v0
+<missing>      3 weeks ago      ENV YARN_VERSION=1.22.22                        0B        buildkit.dockerfile.v0
+<missing>      3 weeks ago      RUN /bin/sh -c addgroup -g 1000 node     && …   142MB     buildkit.dockerfile.v0
+<missing>      3 weeks ago      ENV NODE_VERSION=22.11.0                        0B        buildkit.dockerfile.v0
+<missing>      2 months ago     CMD ["/bin/sh"]                                 0B        buildkit.dockerfile.v0
+<missing>      2 months ago     ADD alpine-minirootfs-3.20.3-x86_64.tar.gz /…   7.8MB     buildkit.dockerfile.v
+
+# One solution to optmize the `build` process is 
+# to separate the installation of third party dependancies
+# from codebase copying
+
+FROM node:22.11-alpine3.20
+RUN addgroup react-app && adduser -S -G react-app daniel
+WORKDIR /app
+COPY package*.json .
+RUN npm install
+RUN chown -R daniel:react-app /app
+USER daniel
+COPY . .
+ENV API_URL=http://apu.myapp.com
+EXPOSE 3000
+CMD ["npm", "start"]
+
+# run a build
+docker build -t react-app-mosh .
+
+# modify the application codebase a little bit
+# and build again the image, and analyze the build process
+
+# Conclusion: Dockerfil structure:
+#     | stable instructions
+#     | stable instructions
+#     |
+#     |
+#     |
+#     | changing instructions
+#     v changing instructions
