@@ -116,8 +116,41 @@ docker start cont-1
 
 # refresh the browser page at port 82, and CONFIRM the application is RUNNING effectively
 
-# 6 - Removing Containers
-# -------------------------
+
+# 6 - Removing Containers 02h44:15
+# ----------------------------------
+
+# 2 ways to remove a STOPPED container:
+
+docker container rm cont-1
+# OR 
+docker rm cont-1
+
+# 2 ways to remove a RUNNING container: using --force OR -f
+
+docker container rm -f cont-1
+# OR 
+docker rm -f cont-1
+
+#check 
+docker ps -a
+
+CONTAINER ID   IMAGE                                         COMMAND                  CREATED          STATUS                      PORTS      NAMES
+03d04160cafc   react-app-mosh:v3                             "docker-entrypoint.s…"   49 minutes ago   Up 18 minutes               3000/tcp   blue-sky
+fbfcf539dc72   react-app-mosh:v3                             "docker-entrypoint.s…"   54 minutes ago   Up 18 minutes               3000/tcp   dazzling_euclid
+4f54d633f901   react-app-mosh:v3                             "docker-entrypoint.s…"   56 minutes ago   Exited (1) 55 minutes ago              condescending_newton
+60ae76eef86a   alpine                                        "/bin/sh"                7 days ago       Exited (0) 7 days ago                  wonderful_newton
+f5061049d19d   ubuntu                                        "/bin/bash"              10 days ago      Exited (255) 7 days ago                eager_jackson
+a5cca4daea25   ubuntu                                        "/bin/bash"              13 days ago      Exited (255) 7 days ago                compassionate_faraday
+890fd0c4be37   hello-docker-mosh                             "docker-entrypoint.s…"   13 days ago      Exited (0) 13 days ago                 focused_clarke
+78bed91b07c3   hello-docker-mosh                             "docker-entrypoint.s…"   2 weeks ago      Exited (0) 13 days ago                 sad_pasteur
+
+# a Linux cmd trick to find 'cont-1'
+docker ps -a | grep cont-1
+# nothing output
+
+# remember; to delete all not running container (CAUTION)
+docker container prune
 
 # 7 - Container File System
 # -------------------------
