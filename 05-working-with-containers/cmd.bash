@@ -152,8 +152,36 @@ docker ps -a | grep cont-1
 # remember; to delete all not running container (CAUTION)
 docker container prune
 
-# 7 - Container File System
-# -------------------------
+
+# 7 - Container File 02h46:03
+# -----------------------------
+
+#check for running containers
+docker ps 
+
+CONTAINER ID   IMAGE               COMMAND                  CREATED             STATUS          PORTS      NAMES
+03d04160cafc   react-app-mosh:v3   "docker-entrypoint.s…"   58 minutes ago      Up 27 minutes   3000/tcp   blue-sky
+fbfcf539dc72   react-app-mosh:v3   "docker-entrypoint.s…"   About an hour ago   Up 27 minutes   3000/tcp   dazzling_euclid
+
+# start a shell session in the container 03d0
+docker exec -it 03d sh
+
+/app $ 
+
+# create something in the file system
+touch UPDATE.txt
+
+# exit the interactive shell
+exit 
+
+# next, start another shell session in the container fbfc
+docker exec -it fbfc sh
+
+# CONFIRM that the file UPDATE.txt is not visible in this second running container: CONFIRMED !!!
+
+# CONCLUSION: each container running or not has his own file system that is invisible to others containers
+# CONCLUSION: Never store data in the file system of a container; in case of the container to be deleted,
+#             all the data will also be lost; prefer docker Volume instead
 
 # 8 - Persisting Data using Volumes
 # ---------------------------------
