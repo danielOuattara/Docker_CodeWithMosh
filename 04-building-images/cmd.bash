@@ -592,12 +592,7 @@ react-app-mosh                                latest    f8b1c5a1f044   4 hours a
 <none>                                        <none>    2952693e5467   6 hours ago    444MB # <-- this !
 <none>                                        <none>    1bae1a887fc3   6 hours ago    444MB # <-- this !
 <none>                                        <none>    1ea19203af7a   22 hours ago   444MB # <-- this !
-laith-harb-node-app-01-building-image-final   latest    96d955585f1c   8 days ago     168MB
-hello-docker-mosh                             latest    f2acf5276833   12 days ago    159MB
-ubuntu                                        latest    59ab366372d5   5 weeks ago    78.1MB
-postgres                                      17        d57ed788c154   7 weeks ago    434MB
-alpine                                        latest    63b790fccc90   2 months ago   7.8MB
-
+...
 
 # remove those dangling images
 docker image prune
@@ -649,11 +644,7 @@ Options:
 $ docker images
 REPOSITORY                                    TAG       IMAGE ID       CREATED        SIZE
 react-app-mosh                                latest    f8b1c5a1f044   4 hours ago    685MB
-laith-harb-node-app-01-building-image-final   latest    96d955585f1c   8 days ago     168MB
-hello-docker-mosh                             latest    f2acf5276833   12 days ago    159MB
-ubuntu                                        latest    59ab366372d5   5 weeks ago    78.1MB
-postgres                                      17        d57ed788c154   7 weeks ago    434MB
-alpine                                        latest    63b790fccc90   2 months ago   7.8MB
+...
 
 
 docker image rm hello-docker
@@ -701,4 +692,214 @@ Commands:
 
 Run 'docker container COMMAND --help' for more information on a command.
 
-# change color
+
+# 13 - Tagging Images 02h20:06
+# ------------------------------
+
+docker images
+REPOSITORY                                    TAG       IMAGE ID       CREATED        SIZE
+react-app-mosh                                latest    f8b1c5a1f044   6 hours ago    685MB
+...
+
+# You should always use correct/explicit tag to identify 
+# what version your are running in each environment (test, staging, production)
+
+# let's first make a clean build image
+docker build -t react-app-mosh .
+
+# 1 - tag an image while building it with:
+
+# name tag
+docker build -t react-app-mosh:buster .
+
+# OR semantic versioning
+docker build -t react-app-mosh:3.1.1 .
+
+# OR using building number
+docker build -t react-app-mosh:75 .
+
+# let's try 
+docker build -t react-app-mosh:v1 .
+
+# then check
+docker images
+
+REPOSITORY                                    TAG       IMAGE ID       CREATED        SIZE
+react-app-mosh                                latest    f8b1c5a1f044   6 hours ago    685MB
+react-app-mosh                                v1        f8b1c5a1f044   6 hours ago    685MB
+...
+
+#  Notice 2 images with the same imageID
+
+# one can remove any of them without issue
+docker images rm react-app-mosh:v1
+
+# check
+$ docker images
+REPOSITORY                                    TAG       IMAGE ID       CREATED        SIZE
+react-app-mosh                                latest    f8b1c5a1f044   6 hours ago    685MB
+...
+
+
+# 2 - tag an image after built it
+docker image tag react-app-mosh:latest react-app-mosh:v2
+
+#check
+docker images
+
+REPOSITORY                                    TAG       IMAGE ID       CREATED        SIZE
+react-app-mosh                                latest    f8b1c5a1f044   6 hours ago    685MB
+react-app-mosh                                v2        f8b1c5a1f044   6 hours ago    685MB
+...
+
+# let's show that the label `latest` is just a 
+# tag by default and does not really mean 'latest'
+
+# update source code a little bit (like add text to README.md)
+# then build a new image with a tag
+
+docker build -t react-app-mosh:v2 .
+
+# the check
+
+docker images
+
+docker images
+REPOSITORY                                    TAG       IMAGE ID       CREATED          SIZE
+react-app-mosh                                v2        61612e27481b   46 seconds ago   685MB # <-- most recent !!
+react-app-mosh                                latest    f8b1c5a1f044   7 hours ago      685MB
+
+
+# 13 - Sharing Images 02h25:40
+# ------------------------------
+
+# 1. head to hub.docker.com
+# 2. loggin
+# 3. create a repository 
+
+# Good To Know: In one remote repository, one can have multiple images with different tags
+
+# How to push an image to the remote repo ??
+
+# tag a new image from 
+docker image tag 61612e27481b danielouattara/react-app-mosh:v2
+
+# check
+docker imagesdocker images
+REPOSITORY                                    TAG       IMAGE ID       CREATED        SIZE
+react-app-mosh                                v2        61612e27481b   4 days ago     685MB
+danielouattara/react-app-mosh                 v2        61612e27481b   4 days ago     685MB
+react-app-mosh                                latest    f8b1c5a1f044   4 days ago     685MB
+...
+
+# login to docker from terminal if required
+docker login 
+
+# push an image to a remote repository 
+docker push danielouattara/react-app-mosh:v2
+
+# wait until completed: done
+
+# make an update on the code: done
+
+# then create a new image
+docker build -t react-app-mosh:v3 ./
+
+# check images
+docker images
+
+# tag the newly created image  
+docker image tag ffec41aa745d danielouattara/react-app-mosh:v3
+
+# check images
+docker images
+
+ docker images
+REPOSITORY                                    TAG       IMAGE ID       CREATED         SIZE
+react-app-mosh                                v3        ffec41aa745d   2 minutes ago   685MB
+danielouattara/react-app-mosh                 v3        ffec41aa745d   2 minutes ago   685MB
+danielouattara/react-app-mosh                 v2        61612e27481b   4 days ago      685MB
+react-app-mosh                                v2        61612e27481b   4 days ago      685MB
+react-app-mosh                                latest    f8b1c5a1f044   4 days ago      685MB
+
+
+# push the newly tagged image to repo
+docker push danielouattara/react-app-mosh:v3
+
+
+
+# Saving and Loading Images 02h30:00
+# -----------------------------------
+
+# In this section: how to share an image to another computer without going through dockerhub ?
+
+# Solution: 
+
+# 1 - save the image as a compressed file
+
+docker image save --help
+
+Usage:  docker image save [OPTIONS] IMAGE [IMAGE...]
+
+Save one or more images to a tar archive (streamed to STDOUT by default)
+
+Aliases:
+  docker image save, docker save
+
+Options:
+  -o, --output string   Write to a file, instead of STDOUT
+
+# ---
+docker save -o react-app-mosh-v3.tar  react-app-mosh:v3
+
+
+# 2 - load it on the other machine
+
+docker image load --help
+
+Usage:  docker image load [OPTIONS]
+
+Load an image from a tar archive or STDIN
+
+Aliases:
+  docker image load, docker load
+
+Options:
+  -i, --input string   Read from tar archive file, instead of STDIN
+  -q, --quiet          Suppress the load output
+
+
+# to test it, first remove  all the react-app-mosh:v3 
+docker image rm react-app-mosh:v3
+
+# check
+docker images
+
+REPOSITORY                                    TAG       IMAGE ID       CREATED          SIZE
+danielouattara/react-app-mosh                 v3        ffec41aa745d   18 minutes ago   685MB
+danielouattara/react-app-mosh                 v2        61612e27481b   4 days ago       685MB
+react-app-mosh                                v2        61612e27481b   4 days ago       685MB
+react-app-mosh                                latest    f8b1c5a1f044   4 days ago       685MB
+
+# also remvove all tag linked to react-app-mosh:v3
+docker image rm ffec41
+
+# check
+docker images
+
+REPOSITORY                                    TAG       IMAGE ID       CREATED          SIZE
+danielouattara/react-app-mosh                 v3        ffec41aa745d   18 minutes ago   685MB
+danielouattara/react-app-mosh                 v2        61612e27481b   4 days ago       685MB
+react-app-mosh                                v2        61612e27481b   4 days ago       685MB
+react-app-mosh                                latest    f8b1c5a1f044   4 days ago       685MB
+
+# now, load the compressed images
+docker image load -i react-app-mosh-v3.tar
+
+#check
+docker images
+REPOSITORY                                    TAG       IMAGE ID       CREATED          SIZE
+react-app-mosh                                v3        ffec41aa745d   24 minutes ago   685MB
+danielouattara/react-app-mosh                 v2        61612e27481b   4 days ago       685MB
+react-app-mosh                                v2        61612e27481b   4 days ago       685MB
+react-app-mosh                                latest    f8b1c5a1f044   4 days ago       685MB
