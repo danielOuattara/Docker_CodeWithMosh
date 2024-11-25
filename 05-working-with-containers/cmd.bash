@@ -1,8 +1,28 @@
 # 1 - Starting Containers
 # -------------------------
 
+# check images
+docker  images
+
+#see running container(s)
+docker ps
+
+# run a new container, 
+# notice the cursor is no more available in the terminal
+docker run react-app-mosh:v3
+
+# run a new container in detached mode
+docker run -d react-app-mosh:v3
+
+# check running container
+docker ps
+
+# run a new container using a self name attribute
+docker run -d --name blue-sky react-app-mosh:v3 
+
+
 # 2 - Viewing the logs
-# -------------------------
+# ---------------------
 
 # 3 - Publishin Ports 
 # -------------------------
