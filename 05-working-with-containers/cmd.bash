@@ -179,12 +179,115 @@ docker exec -it fbfc sh
 
 # CONFIRM that the file UPDATE.txt is not visible in this second running container: CONFIRMED !!!
 
-# CONCLUSION: each container running or not has his own file system that is invisible to others containers
-# CONCLUSION: Never store data in the file system of a container; in case of the container to be deleted,
-#             all the data will also be lost; prefer docker Volume instead
+# CONCLUSION: 
+# 1- each container running or not has his own file system 
+#    that is invisible to others containers
+#
+# 2- Never store data in the file system of a container; 
+#    in case of the container is to be deleted, all the 
+#    data will also be lost; prefer docker Volume instead
 
-# 8 - Persisting Data using Volumes
-# ---------------------------------
+
+# 8 - Persisting Data using Volumes 02h47:37
+# -------------------------------------------
+
+# A volume is a storage outside of container
+
+# show info about volume
+
+docker volume
+
+Usage:  docker volume COMMAND
+
+Manage volumes
+
+Commands:
+  create      Create a volume
+  inspect     Display detailed information on one or more volumes
+  ls          List volumes
+  prune       Remove unused local volumes
+  rm          Remove one or more volumes
+
+Run 'docker volume COMMAND --help' for more information on a command.
+
+# create a volume
+docker volume create vol-app-data
+
+# inspect volume
+docker volume inspect vol-app-data
+
+[
+    {
+        "CreatedAt": "2024-11-26T20:19:43Z",
+        "Driver": "local",
+        "Labels": null,
+        "Mountpoint": "/var/lib/docker/volumes/vol-app-data/_data",
+        "Name": "vol-app-data",
+        "Options": null,
+        "Scope": "local"
+    }
+]
+
+# start a container and give this container for persisting data
+docker run -d -p 8000:3000 -v vol-app-data:/app/data react-app-mosh:v3
+
+# output
+818bd35c09d615ced306124c1baa271e4006c00f717abd89291ce3b494c23108
+
+# start an interactive shell session  on this newly created container
+docker exec -it 818bd sh
+
+# got the 'data' directory and create smthg
+cd /data
+echo a new info > data.txt
+
+/app/data  echo a new info > data.txt
+# sh: can't create data.txt: Permission denied
+
+# cd .. and run ls -l
+
+/app $ ls -l
+total 688
+-rw-r--r--    1 root     root          1484 Nov 20 13:16 Dockerfile
+-rw-r--r--    1 root     root          3465 Nov 20 19:53 README.md
+drwxr-xr-x    2 root     root          4096 Nov 26 20:19 data  # <--- This directory is owned by 'root' user
+drwxr-xr-x    1 daniel   react-ap      4096 Nov 26 20:35 node_modules
+-rw-r--r--    1 root     root        669052 Nov 15 16:07 package-lock.json
+-rw-r--r--    1 root     root           812 Nov 15 16:07 package.json
+drwxr-xr-x    2 root     root          4096 Nov 15 07:50 public
+drwxr-xr-x    2 root     root          4096 Nov 25 12:11 src
+
+# Note that user 'daniel' has no right to write on the 'data/' directory
+
+# In Our cmd above, we let docker itself create and own this directory 
+
+# To prevent such a thing to happen, let's update the Dockerfile
+
+FROM node:22.11-alpine3.20
+RUN addgroup react-app && adduser -S -G react-app daniel
+WORKDIR /app
+COPY package*.json .
+RUN npm install
+RUN chown -R daniel:react-app /app
+USER daniel
+RUN mkdir data  # <-- NEW !
+COPY . .
+ENV API_URL=http://apu.myapp.com
+EXPOSE 3000
+CMD ["npm", "start"]
+
+# try to rebuild the image because of the Dockerfile update
+docker build -t react-app-mosh:v4 ./
+
+# start again a container and give this container for persisting data
+docker run -d -p 8000:3000 -v vol-app-data:/app/data react-app-mosh:v4
+
+# output
+616e8b29691a3c2bd2aa09ea7837171475100af073f6f16724e2db868fa88c26
+
+# start again an interactive shell session on this newly created container
+docker exec -it 616e8 sh
+
 
 # 9 - Copying Files between the host and containers 
 # -------------------------------------------------

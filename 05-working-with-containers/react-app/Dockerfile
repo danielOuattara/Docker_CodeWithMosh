@@ -58,6 +58,7 @@ COPY package*.json .
 RUN npm install
 RUN chown -R daniel:react-app /app
 USER daniel
+RUN mkdir data  # <-- NEW !
 COPY . .
 ENV API_URL=http://apu.myapp.com
 EXPOSE 3000
